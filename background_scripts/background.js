@@ -74,10 +74,12 @@ function getVideoTitle(id, key, cb) {
 }
 
 
-let auth = "Bearer BQCxaLe28j_Mh8HVSi1MYPNH_MXqmBlyCcHNk2F10KJmlSQFFBp4PZ6Ls-difQfvrNeOOV4cozbfmEx96TT6-YPc0cISdlZtZAQw-Vu4urduw7BRX6bj7hSqcIrQX5YhJ3pVYhnHvtwv6QXZs8ygC5d5C1MEc284owGSAVGx1Zwsmbh4g9CjyymbUmUOOtRHKQQ"
+//let auth = "Bearer QCpYca94WxSzTZVpW9qoEsIkL1zrv17l5mrdzkvauBIkwTuJ3h1DvPWiUq2SNDhBjVwbgybHnJkDIxtAb_LQvVU7umk8Wq53eNoBjhkkPkc8-0Z9GN5EdSSaFhjL-xN52soDvg4sh1iEKFan1WPVDTrZgTnzwCkg6VphCWULIgqp9AZPbvMaHgEo9chdqd2O-g"
+browser.storage.local.set({auth : "Bearer LL"});
 let id = youtubeid('https://www.youtube.com/watch?v=34Na4j8AVgA&list=RD6366dxFf-Os&index=23')
 let title;
 const youtubekey = 'AIzaSyCU15C-xTQHFSQeOQNazQ-AswQHq6p1udQ'
+
 const geturl = (url) => {
     console.log("geturl function is working")
     id = youtubeid(url)
@@ -90,12 +92,15 @@ const geturl = (url) => {
             console.log(err)
             return
         } else {
-            returnSpot(tit, auth)
+            browser.storage.local.get(['auth'], res => {
+                let auth = res.auth
+                returnSpot(tit, auth)
+            })
         }
     })
 }
 
-const getAuth = () => {
+async function getAuth () {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", "Basic YmFlOTYzZjRhNmE1NDEwZTk0ZDRkZmM4NmMyMzhmOWE6ZmM4NWYyNWE4ZWM3NGZmNWI0M2FkNzAwYzkxZmJiN2Q=");
     myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -112,15 +117,18 @@ const getAuth = () => {
         redirect: 'follow'
     };
 
-    fetch("https://accounts.spotify.com/api/token", requestOptions)
+    await fetch("https://accounts.spotify.com/api/token", requestOptions)
         .then(response => response.json())
         .then(result => {
-            return result.access_token;
+            browser.storage.local.set({auth: "Bearer " + result.access_token})
+            return 1
         })
         .catch(error => console.log('error', error));
 }
 
 const returnSpot = (tit, auth) => {
+    console.log("returning spot")
+    console.log(auth)
     let titk = encodeURIComponent(tit)
     const weburl = "https://api.spotify.com/v1/search?q=track%3A" + titk + "&type=track"
     const headers = {
@@ -140,22 +148,25 @@ const returnSpot = (tit, auth) => {
             browser.tabs.create({ url: spoturl })
         }).catch(err => {
             console.log(err)
-            auth = getAuth()
-            console.log(auth)
-            console.log(weburl)
-            returnSpot(tit, auth)
+            getAuth().then(res => {
+            browser.storage.local.get(['auth'], res => {
+                let auth = res.auth
+                console.log(weburl)
+                returnSpot(tit, auth)
+            })
+            })
         })
 }
 
 
 const main = () => {
     console.log("I have maybe not given up on life")
-    browser.runtime.onMessage( message => {
-        let current_url;
-        browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-            current_url = tabs[0].url;
-            console.log(current_url)
-            geturl(current_url)
+    browser.runtime.onMessage.addListener( message => {
+        let current_url = message.url;
+        console.log(current_url)
+        geturl(current_url)
+        browser.storage.local.get(['auth'], res => {
+            console.log(res.auth)
         })
     })
 }
