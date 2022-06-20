@@ -1,0 +1,21 @@
+{
+    "manifest_version": 2,
+    "name": "YT-to-Spotify",
+    "version": "1.0",
+    "description": "Adds a browser action icon to the toolbar. Click the button when on a youtube music video. The corresponding spotify song will be opened on another tab.",
+    "icons": {
+        "48": "icons/beasts-48.png"
+    },
+    "permissions": [
+        "tabs",
+        "activeTab"
+    ],
+    "browser_action": {
+        "default_icon": "icons/beasts-32.png",
+        "default_title": "YT-to-Spotify",
+        "default_popup": "popup/geturl.html"
+    },
+    "background": {
+        "scripts": ["background_scripts/background.js"]
+    }
+}
