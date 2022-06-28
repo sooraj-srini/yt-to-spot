@@ -18,5 +18,10 @@
     },
     "background": {
         "scripts": ["background_scripts/background.js"]
+    },
+    "browser_specific_settings" : {
+        "gecko" : {
+            "id" : "soorajsrinivasan314@gmail.com"
+        }
     }
 }
